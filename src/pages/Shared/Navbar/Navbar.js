@@ -1,7 +1,20 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
+import { AuthContext } from '../../../Contexts/AuthProvider';
 
 const Navbar = () => {
+    const { user, logOut } = useContext(AuthContext);
+    const handleSignOut = () => {
+        logOut()
+            .then(() => { })
+            .catch(error => {
+                console.log(error);
+            })
+
+    }
+
+
+
     const MenuItems = <React.Fragment>
         <li className="text-md font-medium hover:bg-accent hover:text-white hover:rounded-lg">
             <Link to="/">Home</Link>
@@ -18,6 +31,17 @@ const Navbar = () => {
         <li className="text-md font-medium hover:bg-accent hover:text-white hover:rounded-lg">
             <Link to="/contact">Contact</Link>
         </li>
+        {user?.uid ?
+            <>
+                <li className="text-md font-medium hover:bg-accent hover:text-white hover:rounded-lg">
+                    <Link to="/dashboard">Dashboard</Link></li>
+                <li className="text-md font-medium hover:bg-accent hover:text-white hover:rounded-lg">
+                    <Link onClick={handleSignOut} >Sign Out</Link></li>
+            </>
+            : <li className="text-md font-medium hover:bg-accent hover:text-white hover:rounded-lg">
+                <Link to="/login">Login</Link></li>
+        }
+
     </React.Fragment>
         ;
     return (
