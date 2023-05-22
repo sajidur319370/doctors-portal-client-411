@@ -1,9 +1,12 @@
 import format from 'date-fns/format';
-import React from 'react';
+import React, { useContext } from 'react';
+import { AuthContext } from '../../../Contexts/AuthProvider';
+import { toast } from 'react-hot-toast';
 
-const BookingModal = ({ treatment, selectedDate, setTreatment }) => {
+const BookingModal = ({ treatment, selectedDate, setTreatment, refetch }) => {
     const { name, slots } = treatment
-    const date = format(selectedDate, 'pp');
+    const date = format(selectedDate, 'PP');
+    const { user } = useContext(AuthContext);
     const handleBooking = event => {
         event.preventDefault();
         const form = event.target;
@@ -20,9 +23,29 @@ const BookingModal = ({ treatment, selectedDate, setTreatment }) => {
             phone,
         }
 
-        setTreatment(null);
+        fetch('http://localhost:5000/bookings', {
+            method: "POST",
+            headers: {
+                'content-type': 'application/json'
+            },
+            body: JSON.stringify(booking)
+        })
+            .then(res => res.json())
+            .then(data => {
+                console.log(data);
+                if (data.acknowledged) {
+                    toast.success("Booking Confirmed");
+                    setTreatment(null);
+                    refetch();
+                } else {
+                    toast.error(data.message);
+                    setTreatment(null);
+                }
+
+            })
 
         console.log(booking);
+        console.log(user);
     }
     return (
         <div>
@@ -39,8 +62,8 @@ const BookingModal = ({ treatment, selectedDate, setTreatment }) => {
                                 slots.map((slot, index) => <option key={index} value={slot}>{slot}</option>)
                             }
                         </select>
-                        <input name='patient' type="text" placeholder="You Name" className="input w-full input-bordered" />
-                        <input name="email" type="Email" placeholder="Your Email" className="input w-full input-bordered" />
+                        <input name='patient' type="text" defaultValue={user?.displayName} placeholder="You Name" className="input w-full input-bordered" />
+                        <input name="email" type="Email" defaultValue={user?.email} placeholder="Your Email" className="input w-full input-bordered" />
                         <input name="phone" type="text" placeholder="Your Phone Number" className="input w-full input-bordered" />
 
                         <br />
