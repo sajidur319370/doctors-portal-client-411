@@ -1,21 +1,32 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useContext } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link } from 'react-router-dom';
 import { AuthContext } from '../../Contexts/AuthProvider';
-
+import { toast } from 'react-hot-toast';
 
 const SignUp = () => {
     const { register, handleSubmit, formState: { errors } } = useForm();
-    const { createUser } = useContext(AuthContext);
+    const { createUser, updateUser } = useContext(AuthContext);
+    const [signUpError, setSignUpError] = useState(' ');
     const handleSignUp = (data) => {
         console.log(data);
+        setSignUpError('');
         createUser(data.email, data.password)
             .then(res => {
                 const user = res.user;
                 console.log(user);
+                toast('User created Successfully.');
+                const userInfo = { displayName: data.name }
+                updateUser(userInfo)
+                    .then(() => { })
+                    .catch(error => console.log((error)))
             })
-            .catch(error => console.log(error));
+            .catch(error => {
+                console.log(error);
+                setSignUpError(error);
+
+            });
     }
     return (
         <section className='my-16'>
@@ -55,6 +66,7 @@ const SignUp = () => {
                         {errors.password?.type === 'minLength' && <p className='text-red-600' role="alert">{errors.password.message}</p>}
                         {errors.password?.type === 'pattern' && <p className='text-red-600' role="alert">{errors.password.message}</p>}
                     </div>
+                    {signUpError && <p className='text-red-600'>{signUpError}</p>}
                     <label className="label">
                         <span className="label-text">Forget Password?</span>
                     </label>
